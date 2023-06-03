@@ -3,16 +3,29 @@ import {
   UploadOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Button, Layout, Menu, theme } from 'antd'
+import { Button, Dropdown, Layout, Menu, message, theme } from 'antd'
 import { useState } from 'react'
-import logo from '../assets/logo.jpg'
+import { logo } from "../tools"
 import { useNavigate } from 'react-router-dom'
 
 const { Header, Sider, Content } = Layout
 const MyLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
-
+  const items = [
+    {
+      label: 'Exit',
+      key: 'logOut',
+    },
+  ]
+  const onClick = ({ key }) => {
+    if (key === 'logOut') {
+      navigate('/')
+    }
+    else {
+      message.info('Not developped')
+    }
+  }
   const {
     token: { colorBgContainer },
   } = theme.useToken()
@@ -27,7 +40,7 @@ const MyLayout = ({ children }) => {
         <Menu
           theme="light"
           mode="inline"
-          defaultSelectedKeys={['1']}
+          defaultSelectedKeys={['/']}
           onClick={({ key }) => {
             // alert(key)
             navigate(key)
@@ -75,7 +88,19 @@ const MyLayout = ({ children }) => {
               height: 64,
             }}
           />
-          <span>MyCloudUploader</span>
+          <span className='app-title'>MyCloud</span>
+          <Dropdown menu={{ items, onClick }}>
+            <img
+              src={logo}
+              alt='logout logo'
+              style={{
+                width: '30px',
+                borderRadius: '50%',
+                float: 'right',
+                marginTop: '16px',
+                marginRight: '20px',
+              }} />
+          </Dropdown>
         </Header>
         <Content
           style={{
