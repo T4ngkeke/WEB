@@ -2,11 +2,17 @@ import flask
 import importlib
 import os
 
+
+
+
 from utils.config import Config
 
 app = flask.Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = os.urandom(24)
+
 Config.check()
+
+
 
 for route_file in os.listdir("routes"):
     if route_file.endswith(".py"):

@@ -1,50 +1,61 @@
 import flask
 import os
-import datetime
+from io import BytesIO
 
+from flask_sqlalchemy import SQLAlchemy
+from routes.api import Upload,db
 from utils.config import Config
 from utils.file import File, human_readable_size
 
 blueprint = flask.Blueprint('file', __name__)
 allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_."
 
+#détails du fichier
 @blueprint.route('/view/<path:path>')
 def get_file(path):
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
-
-    file_path = os.path.join(Config.get_upload_dir(), path)
+    print(path)
+    #print(path)
+    #à réécrire
+    myFile=Upload.query.filter_by(id=path).first()
+    file_path="files/"+str(myFile.id) #==<Upload1>
+    
+    #file_path = os.path.join(Config.get_upload_dir(), path)
+    #print(file_path)
+    '''
     if not os.path.isfile(file_path):
         return flask.jsonify({'error': 'file does not exist'}), 404
+    '''
+    # lire les informations du fichier venant de la base de données
 
     file_delete_path = file_path.replace("files/", "/delete/")
     file_rename_path = file_path.replace("files/", "/rename/")
-    file_extension = os.path.splitext(file_path)[1]
-    file_date = os.path.getmtime(file_path)
-    file_date = datetime.datetime.fromtimestamp(file_date).strftime('%Y-%m-%d %H:%M:%S')
-    file_size = os.path.getsize(file_path)
+    file_name=myFile.filename
+    file_extension = myFile.file_type
+    #file_extension = os.path.splitext(file_path)[1]
+    file_extension = myFile.file_type
+    file_date = myFile.file_time
+    file_size = myFile.file_size
     file_size = human_readable_size(file_size)
-    file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_path.replace("files/", ""), file_date, file_size)
+
+    file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
 
     return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
-
+# téléchargement
 @blueprint.route('/view/raw/<path:path>')
 def get_raw_file(path):
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
-
-    file_path = os.path.join(Config.get_upload_dir(), path)
-    if not os.path.isfile(file_path):
-        return flask.jsonify({'error': 'file does not exist'}), 404
-
-    print(file_path)
-
-    return flask.send_file(file_path)
-
+    
+    myFile=Upload.query.filter_by(id=path).first()
+    return flask.send_file(BytesIO(myFile.data),download_name=myFile.filename,as_attachment=True)
+# à réécrire 
+# renommer
 @blueprint.route('/rename/<path:path>', methods=['POST'])
 def rename_file(path):
     if "authorization" not in flask.session:
@@ -52,20 +63,28 @@ def rename_file(path):
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
 
+    myFile=Upload.query.filter_by(id=path).first()
+    '''
     file_path = os.path.join(Config.get_upload_dir(), path)
     if not os.path.isfile(file_path):
         return flask.jsonify({'error': 'file does not exist'}), 404
-
+    '''
     new_name = flask.request.json["new_name"]
+
+    
     if not new_name:
         return flask.jsonify({'error': 'no new name'}), 400
 
     if not all(c in allowed_chars for c in new_name):
         return flask.jsonify({'error': 'invalid characters in name'}), 400
-
+    '''
     os.rename(file_path, os.path.join(Config.get_upload_dir(), new_name))
+    '''
+    myFile.filename=new_name
+    db.session.commit()
     return flask.jsonify({'success': True}), 200
-
+# à réécrire
+# supprimer
 @blueprint.route('/delete/<path:path>')
 def delete_file(path):
     if "authorization" not in flask.session:
@@ -73,10 +92,42 @@ def delete_file(path):
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
 
-    try:
-        os.remove(os.path.join(Config.get_upload_dir(), path))
-        return flask.jsonify({'success': True}), 200
+    
+    myFile=Upload.query.filter_by(id=path).first()
+    db.session.delete(myFile)
+    db.session.commit()
+    return flask.jsonify({'success': True}), 200
 
-    except FileNotFoundError: return flask.jsonify({'error': 'file not found'}), 404
-    except PermissionError: return flask.jsonify({'error': 'permission denied'}), 403
-    except Exception as e: return flask.jsonify({'error': str(e)}), 500
+@blueprint.route('/rename/<path:path>', methods=['GET'])
+def get_file1(path):
+    if "authorization" not in flask.session:
+        return flask.redirect(flask.url_for('general.login'))
+    if flask.session["authorization"] != Config.get_auth_token():
+        return flask.jsonify({'error': 'unauthorized'}), 403
+    print(path)
+    #print(path)
+    #à réécrire
+    myFile=Upload.query.filter_by(id=path).first()
+    file_path="files/"+str(myFile.id) #==<Upload1>
+    
+    #file_path = os.path.join(Config.get_upload_dir(), path)
+    #print(file_path)
+    '''
+    if not os.path.isfile(file_path):
+        return flask.jsonify({'error': 'file does not exist'}), 404
+    '''
+    # lire les informations du fichier venant de la base de données
+
+    file_delete_path = file_path.replace("files/", "/delete/")
+    file_rename_path = file_path.replace("files/", "/rename/")
+    file_name=myFile.filename
+    file_extension = myFile.file_type
+    #file_extension = os.path.splitext(file_path)[1]
+    file_extension = myFile.file_type
+    file_date = myFile.file_time
+    file_size = myFile.file_size
+    file_size = human_readable_size(file_size)
+
+    file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
+
+    return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
