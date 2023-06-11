@@ -26,11 +26,11 @@ blueprint = flask.Blueprint('api', __name__)
 
 @blueprint.route("/api/upload", methods=['POST'])
 def upload_file():
-    
+    '''
     if flask.request.headers.get("Authorization") != hashlib.md5(Config.get_auth_token().encode()).hexdigest():
         if flask.request.headers.get('Authorization') != Config.get_auth_token(): 
             return flask.jsonify({'error': 'unauthorized'}), 403
-
+    '''
     if "file" not in flask.request.files:
         return flask.jsonify({'error': 'no file'}), 400
 
@@ -54,7 +54,7 @@ def upload_file():
         return flask.jsonify({'success': True}), 200
 
     return flask.jsonify({'error': 'unknown error'}), 500
-
+'''
 @blueprint.route("/api/change_auth_token", methods=['POST'])
 def change_auth_token():
     if flask.request.headers.get("Authorization") != hashlib.md5(Config.get_auth_token().encode()).hexdigest():
@@ -68,3 +68,4 @@ def change_auth_token():
     Config.change_auth_token(new_auth_token)
     flask.session["authorization"] = new_auth_token
     return flask.jsonify({'success': True}), 200
+'''
