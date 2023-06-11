@@ -8,7 +8,7 @@ from utils.config import Config
 from routes.api import Upload
 
 blueprint = flask.Blueprint('general', __name__)
-
+'''
 @blueprint.route('/')
 def index():
     if "authorization" not in flask.session:
@@ -30,11 +30,13 @@ def login():
 def logout():
     flask.session.pop('authorization', None)
     return flask.redirect(flask.url_for('general.index'))
-
+'''
 @blueprint.route('/files', methods=['GET'])
 def files():
+    '''
     if flask.session.get('authorization') != Config.get_auth_token():
         return flask.redirect(flask.url_for('general.login'))
+    '''
     # à réécrire
     # utiliser la base de données
     files1=Upload.query.filter_by(username='admin').all()
@@ -49,7 +51,10 @@ def files():
         file_extension = file.file_type
         file_date = file.file_time
         file_size = file.file_size
-        file_size = human_readable_size(file_size)      
-        files.append(File(file_extension, file_path, file_delete_path, file_rename_path, file_name, file_date, file_size))
-
-    return flask.render_template('files.html', files=files, auth_token_hash=hashlib.md5(Config.get_auth_token().encode('utf-8')).hexdigest(), default_auth_token_hash="b0439fae31f8cbba6294af86234d5a28")
+        file_size = human_readable_size(file_size)
+        files.append({"file_name":file_name,"file_path":file_path,"file_delete_path":file_delete_path,"file_rename_path":file_rename_path,"file_extension":file_extension,"file_date":file_date,"file_size":file_size})   
+        #files.append(File(file_extension, file_path, file_delete_path, file_rename_path, file_name, file_date, file_size))
+    print(files)
+    return files
+    #return {'file_name':"myName"}
+    #return flask.render_template('files.html', files=files, auth_token_hash=hashlib.md5(Config.get_auth_token().encode('utf-8')).hexdigest(), default_auth_token_hash="b0439fae31f8cbba6294af86234d5a28")
