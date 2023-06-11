@@ -13,10 +13,12 @@ allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-
 #détails du fichier
 @blueprint.route('/view/<path:path>')
 def get_file(path):
+    '''
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
+    '''
     print(path)
     #print(path)
     #à réécrire
@@ -41,28 +43,31 @@ def get_file(path):
     file_size = myFile.file_size
     file_size = human_readable_size(file_size)
 
-    file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
-
-    return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
+    #file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
+    file= {"file_name":file_name,"file_path":file_path.replace("files/", "/view/raw/"),"file_delete_path":file_delete_path,"file_rename_path":file_rename_path,"file_extension":file_extension,"file_date":file_date,"file_size":file_size}
+    return file
+    #return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
 # téléchargement
 @blueprint.route('/view/raw/<path:path>')
 def get_raw_file(path):
+    '''
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
-    
+    '''
     myFile=Upload.query.filter_by(id=path).first()
     return flask.send_file(BytesIO(myFile.data),download_name=myFile.filename,as_attachment=True)
 # à réécrire 
 # renommer
 @blueprint.route('/rename/<path:path>', methods=['POST'])
 def rename_file(path):
+    '''
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
-
+    '''
     myFile=Upload.query.filter_by(id=path).first()
     '''
     file_path = os.path.join(Config.get_upload_dir(), path)
@@ -87,12 +92,13 @@ def rename_file(path):
 # supprimer
 @blueprint.route('/delete/<path:path>')
 def delete_file(path):
+    '''
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
 
-    
+    '''
     myFile=Upload.query.filter_by(id=path).first()
     db.session.delete(myFile)
     db.session.commit()
@@ -100,10 +106,12 @@ def delete_file(path):
 
 @blueprint.route('/rename/<path:path>', methods=['GET'])
 def get_file1(path):
+    '''
     if "authorization" not in flask.session:
         return flask.redirect(flask.url_for('general.login'))
     if flask.session["authorization"] != Config.get_auth_token():
         return flask.jsonify({'error': 'unauthorized'}), 403
+    '''
     print(path)
     #print(path)
     #à réécrire
@@ -128,6 +136,7 @@ def get_file1(path):
     file_size = myFile.file_size
     file_size = human_readable_size(file_size)
 
-    file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
-
-    return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
+    #file = File(file_extension, file_path.replace("files/", "/view/raw/"), file_delete_path, file_rename_path, file_name, file_date, file_size)
+    file= {"file_name":file_name,"file_path":file_path.replace("files/", "/view/raw/"),"file_delete_path":file_delete_path,"file_rename_path":file_rename_path,"file_extension":file_extension,"file_date":file_date,"file_size":file_size}
+    return file
+    #return flask.render_template('view.html', file=file, auth_token=flask.session["authorization"])
