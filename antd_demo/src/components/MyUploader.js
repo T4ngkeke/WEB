@@ -2,23 +2,23 @@ import { InboxOutlined } from '@ant-design/icons'
 import { message, Upload } from 'antd'
 const { Dragger } = Upload
 const props = {
-  name: 'file',
-  multiple: true,
-  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  onChange (info) {
-    const { status } = info.file
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList)
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`)
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`)
-    }
-  },
-  onDrop (e) {
-    console.log('Dropped files', e.dataTransfer.files)
-  },
+  customRequest: (componentsData) => {
+    let formData = new FormData();
+    formData.append("file", componentsData.file);
+
+    fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        headers: {  
+        }
+    }).then(function(response) {
+        if (response.status == 200) {
+            window.location.reload();
+        } else {
+            alert("An error occurred while uploading the file.");
+        }
+    });    
+  }
 }
 const MyUploader = () => (
   <Dragger {...props}>
