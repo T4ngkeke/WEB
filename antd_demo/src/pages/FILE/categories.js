@@ -1,13 +1,31 @@
-import React, { useState } from "react"
+import React, { useState,useEffect } from "react"
 import { Card, Button, Form, Input, Table, Space, Modal, message } from 'antd'
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import MyUploader from "../../components/MyUploader"
-
+import axios from "axios"
 
 const Categories = () => {
   const [isShow, setIsShow] = useState(false)  //controle Uploading Modal present/hide
   const [myForm] = Form.useForm() //get form element
+  const [filesData,setFilesData]=useState([])
 
+
+  function getData(){
+    axios({
+      method:"GET",
+      url:"/files",
+    })
+    .then((response)=>setFilesData(response.data)).catch((error)=>{
+      if (error.response) {
+        console.log(error.response)
+        console.log(error.response.status)
+        console.log(error.response.headers)
+      }
+    })}
+ 
+  
+  
+    
   return (
     <>
       <Card title='File List'
@@ -15,6 +33,9 @@ const Categories = () => {
           setIsShow(true)
         }} />}></Button>}
       >
+
+        { useEffect(() => {getData();}, [])}
+        
         <Space direction="vertical" style={{ width: '100%' }}>
           <Form layout="inline"
             onFinish={(v) => {
@@ -30,22 +51,25 @@ const Categories = () => {
               icon={<SearchOutlined />}
             />
           </Form>
+          
           <Table columns={[
             {
-              title: 'Number',
-              width: 80,
-              align: "center",
-            }, {
               title: 'Name',
+              dataIndex:'file_name'
             }, {
-              title: 'Intro',
+              title: 'Type',
               width: 180,
+              dataIndex:'file_extension'
             }, {
               title: 'Date',
+              dataIndex:'file_date'
             }, {
               title: 'Size',
+              dataIndex:'file_size'
             }
-          ]} />
+          ]} 
+        dataSource={filesData}
+          />
         </Space>
       </Card>
       <Modal
@@ -68,17 +92,8 @@ const Categories = () => {
           labelCol={{ span: 3 }}
           form={myForm} //define form to get form content
         >
-          <Form.Item label='Name' name='name' rules={[{
-            required: true,
-            message: 'Please enter file name'
-          }]}>
-            <Input placeholder="Please enter file name" />
-          </Form.Item>
           <Form.Item label='File'>
             <MyUploader />
-          </Form.Item>
-          <Form.Item label='Intro' name='intro'>
-            <Input.TextArea placeholder="Please describe your file" />
           </Form.Item>
         </Form>
 
