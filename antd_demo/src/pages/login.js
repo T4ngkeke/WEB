@@ -8,20 +8,22 @@ const Login = () => {
   const navigate = useNavigate()
 
   const [open, setOpen] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [mail,setMail] = useState(false);
+  const [passw,setPassw] = useState(false);
+  const [confirm,setConfirm] = useState(false);
+  const [ques,setQues] = useState(false);
+  const [answer,setAnswer] = useState(false);
+  const [nick,setNick] = useState(false);
+  // const [confirmLoading, setConfirmLoading] = useState(false);
   // const [modalText, setModalText] = useState('Content of the modal');
   const [myForm] = Form.useForm() //get form element
   const showModal = () => {
     setOpen(true);
   };
   const handleOk = () => {
-    // setModalText('The modal will be closed after two seconds');
     myForm.submit()  //manually trigger form.submit
-    setConfirmLoading(true);
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 2000);
+    if ( mail&&passw&&confirm&&ques&&answer&&nick)
+      setOpen(false)
   };
   const handleCancel = () => {
     console.log('Clicked cancel button');
@@ -105,7 +107,7 @@ const Login = () => {
         maskClosable={false}
         open={open}
         onOk={handleOk}
-        confirmLoading={confirmLoading}
+        // confirmLoading={confirmLoading}
         onCancel={handleCancel}
         destroyOnClose   //clear all when close Modal
       >
@@ -138,7 +140,7 @@ const Login = () => {
             },
           ]}
         >
-          <Input />
+          <Input onChange={()=>setMail(true)}/>
         </Form.Item>
   
         <Form.Item
@@ -152,7 +154,7 @@ const Login = () => {
           ]}
           hasFeedback
         >
-          <Input.Password />
+          <Input.Password onChange={()=>setPassw(true)}/>
         </Form.Item>
   
         <Form.Item
@@ -175,7 +177,7 @@ const Login = () => {
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password onChange={()=>setConfirm(true)}/>
         </Form.Item>
   
         <Form.Item
@@ -190,21 +192,33 @@ const Login = () => {
             },
           ]}
         >
-          <Input />
+          <Input maxLength={100}  onChange={()=>setNick(true)}/>
         </Form.Item>
   
         <Form.Item
-          name="residence"
-          label="Habitual Residence"
-          rules={[
-            {
-              required: true,
-              message: 'Please enter your habitual residence!',
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+              name="question"
+              label="Question"
+              rules={[
+                {
+                  required: true,
+                  message: 'Ask something!',
+                },
+              ]}
+            >
+              <Input maxLength={100} onChange={()=>setQues(true)}/>
+            </Form.Item>
+            <Form.Item
+              name="reponse"
+              label="Reponse"
+              rules={[
+                {
+                  required: true,
+                  message: 'Donnot write secrets here',
+                },
+              ]}
+            >
+              <Input maxLength={100}  onChange={()=>setAnswer(true)}/>
+            </Form.Item>
         </Form>
         </p>
       </Modal>
