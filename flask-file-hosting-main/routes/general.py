@@ -52,7 +52,7 @@ def files():
         file_date = file.file_time
         file_size = file.file_size
         file_size = human_readable_size(file_size)
-        files.append({"file_name":file_name,"file_path":file_path,"file_delete_path":file_delete_path,"file_rename_path":file_rename_path,"file_extension":file_extension,"file_date":file_date,"file_size":file_size})   
+        files.append({"file_name":file_name,"file_path":file_path,"file_download_path":file_path.replace("view/", "view/raw/"),"file_delete_path":file_delete_path,"file_rename_path":file_rename_path,"file_extension":file_extension,"file_date":file_date,"file_size":file_size})   
         #files.append(File(file_extension, file_path, file_delete_path, file_rename_path, file_name, file_date, file_size))
     #print(files)
     return files
