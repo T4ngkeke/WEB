@@ -3,11 +3,15 @@ import { Card, Button, Form, Input, Table, Space, Modal, message } from 'antd'
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import MyUploader from "../../components/MyUploader"
 import axios from "axios"
+import Column from "antd/es/table/Column"
+import { useNavigate } from 'react-router-dom'
+
 
 const Categories = () => {
   const [isShow, setIsShow] = useState(false)  //controle Uploading Modal present/hide
   const [myForm] = Form.useForm() //get form element
   const [filesData,setFilesData]=useState([])
+  const navigate=useNavigate()
 
 
   function getData(){
@@ -23,8 +27,7 @@ const Categories = () => {
       }
     })}
  
-  
-  
+
     
   return (
     <>
@@ -51,25 +54,41 @@ const Categories = () => {
               icon={<SearchOutlined />}
             />
           </Form>
-          
-          <Table columns={[
-            {
-              title: 'Name',
-              dataIndex:'file_name'
-            }, {
-              title: 'Type',
-              width: 180,
-              dataIndex:'file_extension'
-            }, {
-              title: 'Date',
-              dataIndex:'file_date'
-            }, {
-              title: 'Size',
-              dataIndex:'file_size'
-            }
-          ]} 
-        dataSource={filesData}
-          />
+
+            <Table 
+            dataSource={filesData}>
+              <Column 
+               title="Id" dataIndex="file_id" key="file_id" 
+              />
+              <Column 
+               title="Name" dataIndex="file_name" key="file_name" 
+              />
+              <Column 
+               title="Type" dataIndex="file_extension" key="file_extension" 
+              />
+              <Column 
+               title="Date" dataIndex="file_date" key="file_date" 
+              />
+              <Column 
+                title="Size" dataIndex="file_size" key="file_size" 
+              />
+              <Column
+                title="Action"
+                key="action"
+                render={(_,dataIndex) => (
+                    <a onClick={(v) => {
+                      // console.log(text)
+                      console.log(dataIndex)
+                      message.success('View file')
+                      navigate('/admin/upload/file_info',{state:{dataIndex}})
+                      
+                   }}>
+                      View
+                    </a>
+              )}
+            />
+          </Table>
+
         </Space>
       </Card>
       <Modal
