@@ -58,9 +58,6 @@ const Categories = () => {
             <Table 
             dataSource={filesData}>
               <Column 
-               title="Id" dataIndex="file_id" key="file_id" 
-              />
-              <Column 
                title="Name" dataIndex="file_name" key="file_name" 
               />
               <Column 
