@@ -1,7 +1,17 @@
 import React from "react"
+import { useLocation } from "react-router-dom"
+
+
 const FileList = () => {
+  const location=useLocation()
   return (
-    <div>FileList</div>
+    <>
+    <button onClick={()=>{
+      console.log(location)
+    }
+    }>recieve
+    </button>
+    </>
   )
 }
 
