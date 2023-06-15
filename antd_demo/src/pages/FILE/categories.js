@@ -6,13 +6,25 @@ import axios from "axios"
 import Column from "antd/es/table/Column"
 import { useNavigate } from 'react-router-dom'
 
-
 const Categories = () => {
   const [isShow, setIsShow] = useState(false)  //controle Uploading Modal present/hide
   const [myForm] = Form.useForm() //get form element
   const [filesData,setFilesData]=useState([])
+  const [filteredResults, setFilteredResults] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
   const navigate=useNavigate()
-
+  const searchItems = (searchValue) => {
+    setSearchInput(searchValue)
+    if (searchInput !== '') {
+        const filteredData = filesData.filter((item) => {
+            return Object.values(item).join('').toLowerCase().includes(searchInput.toLowerCase())
+        })
+        setFilteredResults(filteredData)
+    }
+    else{
+        setFilteredResults(filesData)
+    }
+}
 
   function getData(){
     axios({
@@ -26,8 +38,9 @@ const Categories = () => {
         console.log(error.response.headers)
       }
     })}
- 
-
+  
+  
+  
     
   return (
     <>
@@ -39,6 +52,8 @@ const Categories = () => {
 
         { useEffect(() => {getData();}, [])}
         
+
+
         <Space direction="vertical" style={{ width: '100%' }}>
           <Form layout="inline"
             onFinish={(v) => {
@@ -46,17 +61,16 @@ const Categories = () => {
             }}
           >
             <Form.Item label='FileName' name='name'>
-              <Input placeholder="Please enter key word" />
+              <Input placeholder="Please enter key word"
+              onChange={(e)=>searchItems(e.target.value)}
+              
+              />
             </Form.Item>
-            <Button
-              htmlType="submit"
-              type='primary'
-              icon={<SearchOutlined />}
-            />
           </Form>
 
+          {searchInput.length>1?(
             <Table 
-            dataSource={filesData}>
+            dataSource={filteredResults}>
               <Column 
                title="Name" dataIndex="file_name" key="file_name" 
               />
@@ -85,6 +99,36 @@ const Categories = () => {
               )}
             />
           </Table>
+          ):( <Table 
+            dataSource={filesData}>
+              <Column 
+               title="Name" dataIndex="file_name" key="file_name" 
+              />
+              <Column 
+               title="Type" dataIndex="file_extension" key="file_extension" 
+              />
+              <Column 
+               title="Date" dataIndex="file_date" key="file_date" 
+              />
+              <Column 
+                title="Size" dataIndex="file_size" key="file_size" 
+              />
+              <Column
+                title="Action"
+                key="action"
+                render={(_,dataIndex) => (
+                    <a onClick={(v) => {
+                      // console.log(text)
+                      console.log(dataIndex)
+                      message.success('View file')
+                      navigate('/admin/upload/file_info',{state:{dataIndex}})
+                      
+                   }}>
+                      View
+                    </a>
+              )}
+            />
+          </Table>)}
 
         </Space>
       </Card>
