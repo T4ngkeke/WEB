@@ -14,6 +14,10 @@ const FileList = () => {
     console.log(e);
   };
 
+
+  
+  
+
   function delete_file(path) {
         fetch(path, {
             method: 'GET'
