@@ -4,10 +4,9 @@ import flask
 import os
 import hashlib
 
-from flask import Flask, render_template,request,send_file
 from flask_sqlalchemy import SQLAlchemy
 
-from utils.config import Config
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,28 +19,59 @@ class Upload(db.Model):
     file_time=db.Column(db.DateTime)
     file_type=db.Column(db.String(10))
     username=db.Column(db.String(50))
+class User (db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username=db.Column(db.String(50))
+    password=db.Column(db.String(64))
+    nickname=db.Column(db.String(100))
+    question=db.Column(db.String(100))
+    response=db.Column(db.String(100))
 
 blueprint = flask.Blueprint('api', __name__)
 
 
+
+@app.route('/login', methods=['POST'])
+def do_admin_login():
+    info=flask.request.get_json(force=True)
+    POST_USERNAME=info['userName']
+    POST_PASSWORD=str(hashlib.sha256(info['password'].encode('utf-8')).hexdigest())
+
+    res=User.query.filter_by(username=POST_USERNAME).first()
+    if res!=None:
+        if res.password==POST_PASSWORD:
+            return flask.jsonify({'success': True}), 200
+    return flask.jsonify({'success': False}), 250
+
+@blueprint.route('/user',methods=['POST'])
+def upload_user():
+    info=flask.request.get_json(force=True)
+    #print(info)
+    if info:
+        #filename = file.filename
+        #file_type à faire!
+        if User.query.filter_by(username=info['email']).first()==None:
+
+            user = User(username=info['email'],password=str(hashlib.sha256(info['password'].encode('utf-8')).hexdigest()),nickname=info['nickname'],question=info['question'],response=str(hashlib.sha256(info['response'].encode('utf-8')).hexdigest()))
+            db.session.add(user)
+            db.session.commit()
+
+        #file.save(os.path.join(Config.get_upload_dir(), filename))
+            return flask.jsonify({'success': True}), 200
+    return flask.jsonify({'success': True}), 200
+
+
+
+
+
 @blueprint.route("/api/upload", methods=['POST'])
 def upload_file():
-    '''
-    if flask.request.headers.get("Authorization") != hashlib.md5(Config.get_auth_token().encode()).hexdigest():
-        if flask.request.headers.get('Authorization') != Config.get_auth_token(): 
-            return flask.jsonify({'error': 'unauthorized'}), 403
-    '''
     if "file" not in flask.request.files:
         return flask.jsonify({'error': 'no file'}), 400
 
     file = flask.request.files['file']
     if file.filename == '':
         return flask.jsonify({'error': 'no file selected'}), 400
-    '''
-    #réécire cette partie
-    if os.path.exists(os.path.join(Config.get_upload_dir(), file.filename)):
-        return flask.jsonify({'error': 'file already exists'}), 409
-    '''
     #réécire cette partie
     if file:
         #filename = file.filename
@@ -54,18 +84,3 @@ def upload_file():
         return flask.jsonify({'success': True}), 200
 
     return flask.jsonify({'error': 'unknown error'}), 500
-'''
-@blueprint.route("/api/change_auth_token", methods=['POST'])
-def change_auth_token():
-    if flask.request.headers.get("Authorization") != hashlib.md5(Config.get_auth_token().encode()).hexdigest():
-        if flask.request.headers.get('Authorization') != Config.get_auth_token(): 
-            return flask.jsonify({'error': 'unauthorized'}), 403
-
-    new_auth_token = flask.request.headers.get('new_auth_token')
-    if new_auth_token == '':
-        return flask.jsonify({'error': 'no new auth token'}), 400
-
-    Config.change_auth_token(new_auth_token)
-    flask.session["authorization"] = new_auth_token
-    return flask.jsonify({'success': True}), 200
-'''
