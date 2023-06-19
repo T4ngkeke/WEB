@@ -13,12 +13,7 @@ allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-
 #détails du fichier
 @blueprint.route('/view/<path:path>')
 def get_file(path):
-    '''
-    if "authorization" not in flask.session:
-        return flask.redirect(flask.url_for('general.login'))
-    if flask.session["authorization"] != Config.get_auth_token():
-        return flask.jsonify({'error': 'unauthorized'}), 403
-    '''
+
     print(path)
     #print(path)
     #à réécrire
@@ -50,30 +45,16 @@ def get_file(path):
 # téléchargement
 @blueprint.route('/view/raw/<path:path>')
 def get_raw_file(path):
-    '''
-    if "authorization" not in flask.session:
-        return flask.redirect(flask.url_for('general.login'))
-    if flask.session["authorization"] != Config.get_auth_token():
-        return flask.jsonify({'error': 'unauthorized'}), 403
-    '''
+    
     myFile=Upload.query.filter_by(id=path).first()
     return flask.send_file(BytesIO(myFile.data),download_name=myFile.filename,as_attachment=True)
 # à réécrire 
 # renommer
 @blueprint.route('/rename/<path:path>', methods=['POST'])
 def rename_file(path):
-    '''
-    if "authorization" not in flask.session:
-        return flask.redirect(flask.url_for('general.login'))
-    if flask.session["authorization"] != Config.get_auth_token():
-        return flask.jsonify({'error': 'unauthorized'}), 403
-    '''
+    
     myFile=Upload.query.filter_by(id=path).first()
-    '''
-    file_path = os.path.join(Config.get_upload_dir(), path)
-    if not os.path.isfile(file_path):
-        return flask.jsonify({'error': 'file does not exist'}), 404
-    '''
+    
     new_name = flask.request.json["new_name"]
 
     
@@ -82,9 +63,7 @@ def rename_file(path):
 
     if not all(c in allowed_chars for c in new_name):
         return flask.jsonify({'error': 'invalid characters in name'}), 400
-    '''
-    os.rename(file_path, os.path.join(Config.get_upload_dir(), new_name))
-    '''
+    
     myFile.filename=new_name
     db.session.commit()
     return flask.jsonify({'success': True}), 200
@@ -92,13 +71,7 @@ def rename_file(path):
 # supprimer
 @blueprint.route('/delete/<path:path>')
 def delete_file(path):
-    '''
-    if "authorization" not in flask.session:
-        return flask.redirect(flask.url_for('general.login'))
-    if flask.session["authorization"] != Config.get_auth_token():
-        return flask.jsonify({'error': 'unauthorized'}), 403
-
-    '''
+   
     myFile=Upload.query.filter_by(id=path).first()
     db.session.delete(myFile)
     db.session.commit()
@@ -106,24 +79,14 @@ def delete_file(path):
 
 @blueprint.route('/rename/<path:path>', methods=['GET'])
 def get_file1(path):
-    '''
-    if "authorization" not in flask.session:
-        return flask.redirect(flask.url_for('general.login'))
-    if flask.session["authorization"] != Config.get_auth_token():
-        return flask.jsonify({'error': 'unauthorized'}), 403
-    '''
+    
     print(path)
     #print(path)
     #à réécrire
     myFile=Upload.query.filter_by(id=path).first()
     file_path="files/"+str(myFile.id) #==<Upload1>
     
-    #file_path = os.path.join(Config.get_upload_dir(), path)
-    #print(file_path)
-    '''
-    if not os.path.isfile(file_path):
-        return flask.jsonify({'error': 'file does not exist'}), 404
-    '''
+   
     # lire les informations du fichier venant de la base de données
 
     file_delete_path = file_path.replace("files/", "/delete/")
