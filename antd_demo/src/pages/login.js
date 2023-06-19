@@ -1,8 +1,9 @@
 import React from "react"
 import { Row, Col, Card, Form, Input, Button, message,Modal } from 'antd'
 import { logo } from "../tools"
-import { useNavigate } from 'react-router-dom'
+import { json, useNavigate } from 'react-router-dom'
 import { useState } from "react"
+
 
 const Login = () => {
   const navigate = useNavigate()
@@ -29,6 +30,30 @@ const Login = () => {
     console.log('Clicked cancel button');
     setOpen(false);
   };
+  function upload_user_info(info){
+   fetch("/user",{
+    method: "POST",
+    body: info,
+    headers: {  
+    }
+   })
+  }
+  async function upload_login(info){
+    const res=await 
+    fetch("/login",{
+     method: "POST",
+     body: info,
+     headers: {  
+     }
+    });
+    const jsonData=await res.json();
+    console.log(jsonData)
+    if (jsonData.success==true){
+      message.success('Succes login')
+      navigate('/admin/personal_info') 
+    }
+   }
+
 
   return (<Row>
     <Col
@@ -55,9 +80,12 @@ const Login = () => {
           }
         }}
           onFinish={(v) => {
-            console.log(v)
-            message.success('Succes login')
-            navigate('/admin/personal_info')
+            console.log(JSON.stringify(v))
+            
+            upload_login(JSON.stringify(v))
+            //console.log(a)
+            //console.log(upload_login(JSON.stringify(v)))
+            
           }}
         >
           <Form.Item
@@ -117,7 +145,8 @@ const Login = () => {
           
           onFinish={(v) => { 
             message.success('Success submit')
-            console.log(v)
+            console.log(JSON.stringify(v))
+            upload_user_info(JSON.stringify(v))
           }}
           labelCol={{ span: 7 }}
           form={myForm} //define form to get form content
@@ -208,8 +237,8 @@ const Login = () => {
               <Input maxLength={100} onChange={()=>setQues(true)}/>
             </Form.Item>
             <Form.Item
-              name="reponse"
-              label="Reponse"
+              name="response"
+              label="Response"
               rules={[
                 {
                   required: true,
